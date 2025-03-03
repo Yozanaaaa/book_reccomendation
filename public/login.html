@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - DWIT</title>
+  <!-- Linking the external CSS file -->
+  <link rel="stylesheet" href="styles/login.css">
+  <!-- Importing Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="form-container">
+    <div class="login-form">
+      <h2>Login</h2>
+      <form action="/login" method="POST">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <p class="or">OR</p>
+
+      <!-- Google Sign-In Button -->
+      <p>Don't have an account? 
+        <button class="google-btn" onclick="redirectToGoogle()">Sign Up with Google</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- JavaScript for Google OAuth Redirect -->
+  <script>
+    function redirectToGoogle() {
+      // Redirect to Google OAuth route for both login and sign up
+      window.location.href = "/auth/google";
+    }
+  </script>
+
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script>
+    function handleGoogleSignIn(googleUser) {
+      const id_token = googleUser.getAuthResponse().id_token;
+      fetch('/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: id_token }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/dashboard';
+        } else {
+          alert('Login failed');
+        }
+      });
+    }
+
+    function handleGoogleSignUp() {
+      const auth2 = gapi.auth2.getAuthInstance();
+      auth2.signIn().then(function(googleUser) {
+        const id_token = googleUser.getAuthResponse().id_token;
+        fetch('/auth/google/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: id_token }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/dashboard';
+          } else {
+            alert('Sign-up failed');
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>
